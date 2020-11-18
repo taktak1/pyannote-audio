@@ -1,2 +1,7 @@
 # @package _group_
 _target_: pyannote.audio.models.PyanNet
+lstm:
+  hidden_size: 128
+  num_layers: 2
+  bidirectional: True
+linear: [128, 128]
