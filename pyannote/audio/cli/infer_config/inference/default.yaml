@@ -1,0 +1,5 @@
+# @package _group_
+_target_: pyannote.audio.core.inference.Inference
+window: sliding
+batch_size: 32
+device: auto

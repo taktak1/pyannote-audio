@@ -1,0 +1,10 @@
+
+checkpoint: ???
+
+protocol:
+  name: ???
+  subset: test
+
+defaults:
+  - inference: default
+  - hydra/help: infer

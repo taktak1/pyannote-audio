@@ -1,0 +1,36 @@
+# @package _group_
+
+app_name: pyannote-audio-infer
+
+header: == ${hydra.help.app_name} ==
+
+footer: |-
+  Powered by Hydra (https://hydra.cc)
+  Use --hydra-help to view Hydra specific help
+
+template: |-
+  ${hydra.help.header}
+
+  Apply pretrained model on an audio file.
+
+  Usage
+  ======
+
+  pyannote-audio-infer checkpoint={checkpoint} audio={file_name}
+  pyannote-audio-infer checkpoint={checkpoint} protocol={protocol_name} subset={subset}
+  * {checkpoint} is the path to a model checkpoint;
+  * {file_name} is the path to an audio file;
+  * {protocol_name} is the name of pyannote.database protocol;
+  * {subset} is one of "test" (default), "development", or "train".
+
+  Options
+  =======
+
+  Here, we describe the most common options: use "--cfg job" option to get a complete list.
+
+  * inference.duration: chunk duration, in seconds. Defaults to duration used for training the model.
+  * inference.step: step between consecutive chunks, in seconds. Defaults to 10% of duration.
+  * inference.batch_size: batch size. Larger values make inference faster. Defaults to 32.
+  * inference.device: device. Defaults to "cuda" when GPU is available, "cpu" otherwise.
+
+  ${hydra.help.footer}
