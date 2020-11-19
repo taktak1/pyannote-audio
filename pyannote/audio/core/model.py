@@ -415,10 +415,12 @@ class Model(pl.LightningModule):
         task_specifications = self.hparams.task_specifications
 
         if self.is_multi_task:
-            return {
-                name: self.helper_default_activation(specs)
-                for name, specs in task_specifications.items()
-            }
+            return nn.ModuleDict(
+                {
+                    name: self.helper_default_activation(specs)
+                    for name, specs in task_specifications.items()
+                }
+            )
 
         return self.helper_default_activation(task_specifications)
 
