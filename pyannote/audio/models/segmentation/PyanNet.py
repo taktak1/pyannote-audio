@@ -80,6 +80,8 @@ class PyanNet(Model):
             linear_hparams.update(**linear)
         self.hparams.linear = linear_hparams
 
+        self.wav_norm1d = torch.nn.InstanceNorm1d(1, affine=True)
+
         self.conv1d = nn.ModuleList()
         self.pool1d = nn.ModuleList()
         self.norm1d = nn.ModuleList()
@@ -156,9 +158,19 @@ class PyanNet(Model):
         scores : (batch, frame, classes)
         """
 
-        outputs = waveforms
-        for conv1d, pool1d, norm1d in zip(self.conv1d, self.pool1d, self.norm1d):
-            outputs = norm1d(pool1d(conv1d(outputs)))
+        outputs = self.wav_norm1d(waveforms)
+
+        for c, (conv1d, pool1d, norm1d) in enumerate(
+            zip(self.conv1d, self.pool1d, self.norm1d)
+        ):
+
+            outputs = conv1d(outputs)
+
+            # https://github.com/mravanelli/SincNet/issues/4
+            if c == 0:
+                outputs = torch.abs(outputs)
+
+            outputs = F.leaky_relu(norm1d(pool1d(outputs)))
 
         outputs, _ = self.lstm(
             rearrange(outputs, "batch feature frame -> batch frame feature")
