@@ -620,8 +620,11 @@ def load_from_checkpoint(
         Model
     """
 
+    # pytorch-lightning expects str, not Path.
+    checkpoint_path = str(checkpoint_path)
+
     # obtain model class from the checkpoint
-    checkpoint = pl_load(str(checkpoint_path), map_location=map_location)
+    checkpoint = pl_load(checkpoint_path, map_location=map_location)
 
     module_name: str = checkpoint["pyannote.audio"]["model"]["module"]
     module = import_module(module_name)
