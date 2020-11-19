@@ -24,6 +24,7 @@ import warnings
 from dataclasses import dataclass
 from functools import cached_property
 from importlib import import_module
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Text, Tuple, Union
 
 import pytorch_lightning as pl
@@ -603,7 +604,9 @@ class Model(pl.LightningModule):
         return self._helper_by_name(modules, recurse=recurse, requires_grad=True)
 
 
-def load_from_checkpoint(checkpoint_path: str, map_location=None) -> Model:
+def load_from_checkpoint(
+    checkpoint_path: Union[Path, Text], map_location=None
+) -> Model:
     """Load model from checkpoint
 
     Parameters
@@ -618,7 +621,7 @@ def load_from_checkpoint(checkpoint_path: str, map_location=None) -> Model:
     """
 
     # obtain model class from the checkpoint
-    checkpoint = pl_load(checkpoint_path, map_location=map_location)
+    checkpoint = pl_load(str(checkpoint_path), map_location=map_location)
 
     module_name: str = checkpoint["pyannote.audio"]["model"]["module"]
     module = import_module(module_name)
