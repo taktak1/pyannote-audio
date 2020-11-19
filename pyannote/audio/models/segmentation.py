@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 
-from typing import List, Optional
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -51,7 +51,7 @@ class PyanNet(Model):
         i.e. two bidirectional layers with 128 units each.
     linear : dict, optional
         Keyword arugments used to initialize linear layers
-        Defaults to {"hidden_size": 128, "num_layers": 2}, 
+        Defaults to {"hidden_size": 128, "num_layers": 2},
         i.e. two linear layers with 128 units each.
     """
 
@@ -74,14 +74,14 @@ class PyanNet(Model):
             }
         # this is not negotiable
         lstm["batch_first"] = True
-        self.lstm = lstm
+        self.hparams.lstm = lstm
 
         if linear is None:
             linear = {
                 "hidden_size": 128,
                 "num_layers": 2,
             }
-        self.linear = linear
+        self.hparams.linear = linear
 
         self.conv1d = nn.ModuleList()
         self.pool1d = nn.ModuleList()
@@ -115,29 +115,32 @@ class PyanNet(Model):
         self.pool1d.append(nn.MaxPool1d(3, stride=3, padding=0, dilation=1))
         self.norm1d.append(nn.InstanceNorm1d(60, affine=True))
 
-        self.recurrent = nn.LSTM(60, **self.lstm)
+        self.lstm = nn.LSTM(60, **self.hparams.lstm)
 
-        lstm_out_features: int = self.recurrent.hidden_size * (
-            2 if self.recurrent.bidirectional else 1
+        lstm_out_features: int = self.lstm.hidden_size * (
+            2 if self.lstm.bidirectional else 1
         )
 
-        if self.linear["num_layers"] > 0:
-            self.feed_forward = nn.ModuleList(
+        if self.hparams.linear["num_layers"] > 0:
+            self.linear = nn.ModuleList(
                 [
                     nn.Linear(in_features, out_features)
                     for in_features, out_features in pairwise(
-                            [lstm_out_features, ] + [self.linear["hidden_size"]] * self.linear["num_layers"])
+                        [
+                            lstm_out_features,
+                        ]
+                        + [self.hparams.linear["hidden_size"]]
+                        * self.hparams.linear["num_layers"]
+                    )
                 ]
             )
 
     def build(self):
 
-        if self.linear["num_layers"] > 0:
-            in_features = self.linear["hidden_size"]
+        if self.hparams.linear["num_layers"] > 0:
+            in_features = self.hparams.linear["hidden_size"]
         else:
-            in_features = self.recurrent.hidden_size * (
-                2 if self.recurrent.bidirectional else 1
-            )
+            in_features = self.lstm.hidden_size * (2 if self.lstm.bidirectional else 1)
 
         self.classifier = nn.Linear(
             in_features, len(self.hparams.task_specifications.classes)
@@ -160,12 +163,12 @@ class PyanNet(Model):
         for conv1d, pool1d, norm1d in zip(self.conv1d, self.pool1d, self.norm1d):
             outputs = norm1d(pool1d(conv1d(outputs)))
 
-        outputs, _ = self.recurrent(
+        outputs, _ = self.lstm(
             rearrange(outputs, "batch feature frame -> batch frame feature")
         )
 
-        if self.linear["num_layers"] > 0:
-            for linear in self.feed_forward:
+        if self.hparams.linear["num_layers"] > 0:
+            for linear in self.linear:
                 outputs = torch.tanh(linear(outputs))
 
         return self.activation(self.classifier(outputs))
