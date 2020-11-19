@@ -55,6 +55,9 @@ class PyanNet(Model):
         i.e. two linear layers with 128 units each.
     """
 
+    LSTM_DEFAULTS = {"hidden_size": 128, "num_layers": 2, "bidirectional": True}
+    LINEAR_DEFAULTS = {"hidden_size": 128, "num_layers": 2}
+
     def __init__(
         self,
         sample_rate: int = 16000,
@@ -66,22 +69,16 @@ class PyanNet(Model):
 
         super().__init__(sample_rate=sample_rate, num_channels=num_channels, task=task)
 
-        if lstm is None:
-            lstm = {
-                "hidden_size": 128,
-                "num_layers": 2,
-                "bidirectional": True,
-            }
-        # this is not negotiable
-        lstm["batch_first"] = True
-        self.hparams.lstm = lstm
+        lstm_hparams = dict(**self.LSTM_DEFAULTS)
+        if lstm is not None:
+            lstm_hparams.update(**lstm)
+        lstm_hparams["batch_first"] = True  # this is not negotiable
+        self.hparams.lstm = lstm_hparams
 
-        if linear is None:
-            linear = {
-                "hidden_size": 128,
-                "num_layers": 2,
-            }
-        self.hparams.linear = linear
+        linear_hparams = dict(**self.LINEAR_DEFAULTS)
+        if linear is not None:
+            linear_hparams.update(**linear)
+        self.hparams.linear = linear_hparams
 
         self.conv1d = nn.ModuleList()
         self.pool1d = nn.ModuleList()
