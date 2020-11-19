@@ -22,6 +22,7 @@
 
 import warnings
 from functools import cached_property
+from pathlib import Path
 from typing import Dict, List, Optional, Text, Tuple, Union
 
 import numpy as np
@@ -30,7 +31,7 @@ from einops import rearrange
 from pytorch_lightning.utilities.memory import is_oom_error
 
 from pyannote.audio.core.io import AudioFile
-from pyannote.audio.core.model import Model, ModelIntrospection
+from pyannote.audio.core.model import Model, ModelIntrospection, load_from_checkpoint
 from pyannote.audio.core.task import Scale, TaskSpecification
 from pyannote.core import Segment, SlidingWindow, SlidingWindowFeature
 
@@ -62,7 +63,7 @@ class Inference:
 
     def __init__(
         self,
-        model: Model,
+        model: Union[Model, Text, Path],
         window: Text = "sliding",
         device: torch.device = None,
         duration: float = None,
@@ -71,7 +72,9 @@ class Inference:
         slide: bool = True,
     ):
 
-        self.model = model
+        self.model = (
+            model if isinstance(model, Model) else load_from_checkpoint(Path(model))
+        )
 
         if window not in ["sliding", "whole"]:
             raise ValueError('`window` must be "sliding" or "whole".')
