@@ -4,4 +4,6 @@ lstm:
   hidden_size: 128
   num_layers: 2
   bidirectional: True
-linear: [128, 128]
+linear:
+  hidden_size: 128
+  num_layers: 2

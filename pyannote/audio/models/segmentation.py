@@ -49,8 +49,9 @@ class PyanNet(Model):
         Keyword arguments passed to the LSTM layer.
         Defaults to {"hidden_size": 128, "num_layers": 2, "bidirectional": True},
         i.e. two bidirectional layers with 128 units each.
-    linear : list of int, optional
-        Output dimension of linear layers. Defaults to [128, 128],
+    linear : dict, optional
+        Keyword arugments used to initialize linear layers
+        Defaults to {"hidden_size": 128, "num_layers": 2}, 
         i.e. two linear layers with 128 units each.
     """
 
@@ -59,7 +60,7 @@ class PyanNet(Model):
         sample_rate: int = 16000,
         num_channels: int = 1,
         lstm: dict = None,
-        linear: List[int] = None,
+        linear: dict = None,
         task: Optional[Task] = None,
     ):
 
@@ -76,7 +77,10 @@ class PyanNet(Model):
         self.lstm = lstm
 
         if linear is None:
-            linear = [128, 128]
+            linear = {
+                "hidden_size": 128,
+                "num_layers": 2,
+            }
         self.linear = linear
 
         self.conv1d = nn.ModuleList()
@@ -116,22 +120,20 @@ class PyanNet(Model):
         lstm_out_features: int = self.recurrent.hidden_size * (
             2 if self.recurrent.bidirectional else 1
         )
-        self.feed_forward = nn.ModuleList(
-            [
-                nn.Linear(in_features, out_features)
-                for in_features, out_features in pairwise(
-                    [
-                        lstm_out_features,
-                    ]
-                    + self.linear
-                )
-            ]
-        )
+
+        if self.linear["num_layers"] > 0:
+            self.feed_forward = nn.ModuleList(
+                [
+                    nn.Linear(in_features, out_features)
+                    for in_features, out_features in pairwise(
+                            [lstm_out_features, ] + [self.linear["hidden_size"]] * self.linear["num_layers"])
+                ]
+            )
 
     def build(self):
 
-        if self.linear:
-            in_features = self.linear[-1]
+        if self.linear["num_layers"] > 0:
+            in_features = self.linear["hidden_size"]
         else:
             in_features = self.recurrent.hidden_size * (
                 2 if self.recurrent.bidirectional else 1
@@ -162,7 +164,8 @@ class PyanNet(Model):
             rearrange(outputs, "batch feature frame -> batch frame feature")
         )
 
-        for linear in self.feed_forward:
-            outputs = torch.tanh(linear(outputs))
+        if self.linear["num_layers"] > 0:
+            for linear in self.feed_forward:
+                outputs = torch.tanh(linear(outputs))
 
         return self.activation(self.classifier(outputs))
