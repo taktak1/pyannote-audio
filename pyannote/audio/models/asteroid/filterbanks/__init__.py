@@ -1,7 +1,7 @@
 from .analytic_free_fb import AnalyticFreeFB
 from .enc_dec import Decoder, Encoder, Filterbank
 from .free_fb import FreeFB
-from .griffin_lim import griffin_lim, misi
+#from .griffin_lim import griffin_lim, misi
 from .multiphase_gammatone_fb import MultiphaseGammatoneFB
 from .param_sinc_fb import ParamSincFB
 from .stft_fb import STFTFB
