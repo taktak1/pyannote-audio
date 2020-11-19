@@ -29,9 +29,8 @@ from einops import rearrange
 
 from pyannote.audio.core.model import Model
 from pyannote.audio.core.task import Task
+from pyannote.audio.models.asteroid.filterbanks import Encoder, ParamSincFB
 from pyannote.core.utils.generators import pairwise
-
-from .asteroid.filterbanks import Encoder, ParamSincFB
 
 
 class PyanNet(Model):
