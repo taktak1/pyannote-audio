@@ -69,7 +69,6 @@ class Inference:
         duration: float = None,
         step: float = None,
         batch_size: int = 32,
-        slide: bool = True,
     ):
 
         self.model = (
