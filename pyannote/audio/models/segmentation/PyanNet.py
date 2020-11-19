@@ -25,6 +25,7 @@ from typing import Optional
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from einops import rearrange
 
 from pyannote.audio.core.model import Model
@@ -165,6 +166,6 @@ class PyanNet(Model):
 
         if self.hparams.linear["num_layers"] > 0:
             for linear in self.linear:
-                outputs = torch.tanh(linear(outputs))
+                outputs = F.leaky_relu(linear(outputs))
 
         return self.activation(self.classifier(outputs))
