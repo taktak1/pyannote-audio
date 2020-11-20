@@ -11,13 +11,13 @@ Protocols:
               annotation: ./AMI/MixHeadset.train.rttm
               annotated: ./AMI/MixHeadset.train.uem
            development:
-              uri: ./AMI/MixHeadset.development.lst
-              annotation: ./AMI/MixHeadset.development.rttm
-              annotated: ./AMI/MixHeadset.development.uem
+              uri: ./AMI/MixHeadset.train.lst
+              annotation: ./AMI/MixHeadset.train.rttm
+              annotated: ./AMI/MixHeadset.train.uem
            test:
-              uri: ./AMI/MixHeadset.test.lst
-              annotation: ./AMI/MixHeadset.test.rttm
-              annotated: ./AMI/MixHeadset.test.uem
+              uri: ./AMI/MixHeadset.train.lst
+              annotation: ./AMI/MixHeadset.train.rttm
+              annotated: ./AMI/MixHeadset.train.uem
    MUSAN:
       Collection:
          BackgroundNoise:
